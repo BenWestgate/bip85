@@ -1,6 +1,0 @@
-pycoin
-mnemonic
-pytest
-base58
-monero
-pycryptodome
