@@ -2,6 +2,9 @@
 import hashlib
 import hmac
 from electrum import bip32, ecc
+from electrum.crypto import hash_160
+import multiprocessing
+from functools import partial
 
 
 def derive_entropy(master_xprv, path):
@@ -26,13 +29,10 @@ def pgrind_index_for_fingerprint(master_xprv, ident_fingerprint='01010', index=-
     return str(index), derive_xprv(master_xprv, str(index)).calc_fingerprint_of_this_node().hex()
 
 
-import multiprocessing
-from functools import partial
 
-import multiprocessing
-from functools import partial
+
 from electrum import ecc
-from electrum.crypto import hash_160
+
 
 
 def worker(index, master_node, path, ident_fingerprint):
