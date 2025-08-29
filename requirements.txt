@@ -1,0 +1,6 @@
+pycoin
+mnemonic
+pytest
+base58
+pycryptodome
+electrum
