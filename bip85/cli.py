@@ -84,13 +84,36 @@ def main():
                                   default='????',
                                   help='Four character identifier for codex32 backup')
     subparsers.add_parser('wif', help='Derive a HD-Seed WIF')
+    subparsers.add_parser('xprv', help='Derive an XPRV (master private key)')
     app_hex_parser = subparsers.add_parser('hex',
                                            help='Derive a HEX bytes sequence')
     app_hex_parser.add_argument('--num-bytes',
                                 type=int,
                                 required=True,
                                 help='Number of bytes to generate')
-    subparsers.add_parser('xprv', help='Derive an XPRV (master private key)')
+    app_base64_parser = subparsers.add_parser('base64', help='Derive a Base64 password')
+    app_base64_parser.add_argument('--pwd-len',
+                                   type=int,
+                                   required=True,
+                                   choices=tuple(range(20,87)),
+                                   help='Password length in characters')
+    app_base85_parser = subparsers.add_parser('base85', help='Derive a Base85 password')
+    app_base85_parser.add_argument('--pwd-len',
+                                   type=int,
+                                   required=True,
+                                   choices=tuple(range(10,81)),
+                                   help='Password length in characters')
+    app_dice_parser = subparsers.add_parser('dice', help='Use this application to generate PIN numbers, numeric secrets, and secrets over custom alphabets')
+    app_dice_parser.add_argument('--sides',
+                                type=int,
+                                required=True,
+                                help='An N-sided die produces values in the range [0, N-1], inclusive'
+                                )
+    app_dice_parser.add_argument('--rolls',
+                                type=int,
+                                required=True,
+                                help='Number of values to generate'
+                                )
     args = parser.parse_args()
     xprv = _get_xprv_from_args(args)
     print(f"Using master private key: {xprv}")
@@ -101,10 +124,17 @@ def main():
                          args.identifier, args.index))
     elif args.bip85_app == 'wif':
         print(app.wif(xprv, args.index))
-    elif args.bip85_app == 'hex':
-        print(app.hex(xprv, args.index, args.num_bytes))
     elif args.bip85_app == 'xprv':
         print(app.xprv(xprv, args.index))
+    elif args.bip85_app == 'hex':
+        print(app.hex(xprv, args.index, args.num_bytes))
+    elif args.bip85_app == 'base64':
+        print(app.base64(xprv, args.pwd_len, args.index))
+    elif args.bip85_app == 'base85':
+        print(app.base85(xprv, args.pwd_len, args.index))
+    elif args.bip85_app == 'dice':
+        print(app.dice(xprv, args.sides, args.rolls, args.index))
+
 
 
 if __name__ == "__main__":
