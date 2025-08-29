@@ -68,7 +68,7 @@ def main():
                                   type=int,
                                   required=True,
                                   choices=(0, 2, 3, 4, 5, 6, 7, 8, 9),
-                                  help='Threshold for codex32 backup')
+                                  help='Threshold value for codex32 backup')
     app_bip93_parser.add_argument('--n',
                                   type=int,
                                   required=True,
@@ -82,7 +82,7 @@ def main():
     app_bip93_parser.add_argument('--identifier',
                                   type=str,
                                   default='????',
-                                  help='Identifier for codex32 backup')
+                                  help='Four character identifier for codex32 backup')
     subparsers.add_parser('wif', help='Derive a HD-Seed WIF')
     app_hex_parser = subparsers.add_parser('hex',
                                            help='Derive a HEX bytes sequence')
