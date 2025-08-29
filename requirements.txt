@@ -3,4 +3,3 @@ mnemonic
 pytest
 base58
 pycryptodome
-electrum
