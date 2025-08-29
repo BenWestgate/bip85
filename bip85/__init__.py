@@ -21,12 +21,14 @@
 
 import hmac
 import hashlib
+import math
 from mnemonic import Mnemonic as bip39
 from .BIP85DRNG import new as DRNG
 from pycoin.symbols.btc import network as BTC
 from pycoin.encoding.bytes32 import from_bytes_32, to_bytes_32
 from .bip93 import CHARSET, ms32_recover, fingerprint, convertbits, ms32_interpolate, ms32_encode, validate_set
 import base58
+
 
 
 class BIP85(object):
@@ -111,7 +113,6 @@ class BIP85(object):
             initial_codex32_data) > 1 else initial_codex32_data[0]
         if 32 in id:
             bip32_fp = fingerprint(bytes(convertbits(codex32_secret[6:], 5, 8)))
-            print(bip32_fp)
             for data in initial_codex32_data:
                 for i in range(1,5): # relabel shares with the BIP32 fingerprint
                     data[i] = data[i] if id[i - 1] < 32 else bip32_fp[i - 1]
@@ -137,3 +138,22 @@ class BIP85(object):
             "identifier": strings[0][len(hrp) + 2:len(hrp) + 6],
             "codex32": strings,
         }
+    
+    def do_rolls(self, entropy: bytes, sides: int, rolls: int) -> str:
+        """sides > 1, 1 < rolls > 100"""
+        max_width = len(str(sides - 1))
+        history = []
+        bits_per_roll = math.ceil(math.log(sides, 2))
+        bytes_per_roll = math.ceil(bits_per_roll / 8)
+        drng = DRNG(entropy)
+        while len(history) < rolls:
+            trial_int = int.from_bytes(drng.read(bytes_per_roll), "big")
+            available_bits = 8 * bytes_per_roll
+            excess_bits = available_bits - bits_per_roll
+            trial_int >>= excess_bits
+            if trial_int >= sides:
+                continue
+            else:
+                history.append(f"{trial_int:0{max_width}d}")
+
+        return ",".join(history)
