@@ -256,7 +256,7 @@ def fingerprint(seed):
 def encode_secret(secret, hrp='ms', k='0', ident='', index='s', pad_val='xor'):
     """Encode a codex32 string."""
     if not ident:
-        ident = [CHARSET(x) for x in fingerprint(secret)]
+        ident = "".join([CHARSET[x] for x in fingerprint(secret)])
     ms32_header = [CHARSET.find(x) for x in k + ident + index]
     payload = convertbits(secret, 8, 5, pad_val=pad_val)
     ret = ms32_encode(hrp, ms32_header + payload)
