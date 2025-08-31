@@ -30,7 +30,6 @@ from .bip93 import CHARSET, ms32_recover, fingerprint, convertbits, ms32_interpo
 import base58
 
 
-
 class BIP85(object):
     def _decorate_path(self, path):
         return path.replace("m/", "").replace("'", "p")
