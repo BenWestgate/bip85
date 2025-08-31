@@ -26,7 +26,7 @@ import pytest
 XPRV = 'xprv9s21ZrQH143K2LBWUUQRFXhucrQqBpKdRRxNVq2zBqsx8HVqFk2uYo8kmbaLLHRdqtQpUm98uKfu3vca1LqdGhUtyoFnCNkfmXRyPXLjbKb'
 
 
-def test_mnemonic():
+def test_mnemonic_to_entropy():
     bip85 = BIP85()
     mnemonic = 'install scatter logic circle pencil average fall shoe quantum disease suspect usage'
     test = bip85.bip39_mnemonic_to_entropy("m/83696968'/0'/0'", mnemonic)
@@ -86,6 +86,32 @@ def test_mnemonic():
     assert bip85.entropy_to_bip39(entropy, 24) == \
                      'puppy ocean match cereal symbol another shed magic wrap hammer bulb intact gadget divorce twin tonight reason outdoor destroy simple truth cigar social volcano'
 
+def test_entropy_to_codex32():
+    bip85 = BIP85()
+    entropy = bip85.bip32_xprv_to_entropy("m/83696968'/93'/0'/0'/1'/16'/24'/15'/32'/32'/0'", XPRV)
+    unshared_ms_secret = {'identifier': 'c0ny', 'codex32': ['ms10c0nys4xklclp0lneyfjmyp9uhlfdzqfwwengqaduatsw']}
+    assert bip85.entropy_to_bip93(entropy, threshold=0, n=1, byte_length=16, id=[24,15,32,32]) == unshared_ms_secret
+    
+    entropy = bip85.bip32_xprv_to_entropy("m/83696968'/93'/1'/0'/1'/32'/32'/32'/32'/32'/0'", XPRV)
+    unshared_cl_secret = {'identifier': 'wwak', 'codex32': ['cl10wwakss63h2vh43mjdk9sjjendkyy2mvt2n6frt83sly7afjh85xl3l9qlp63pyuukcyqyf']}
+    assert bip85.entropy_to_bip93(entropy, hrp='cl', threshold=0, n=1, byte_length=32, id=[32,32,32,32]) == unshared_cl_secret
+
+    entropy = bip85.bip32_xprv_to_entropy("m/83696968'/93'/0'/2'/3'/16'/24'/15'/15'/31'/0'", XPRV)
+    fresh_seed_one = {'identifier': 'c00l', 'codex32': ['ms12c00ln4kx8hawgstmrky88szf0qc7p9snrryzwl06tay6', 'ms12c00lpc9sddr6j0kl48m8j7n9sfg4p39ajmq4xx40xwvt', 'ms12c00lyj8fjetdxqhrvt58zalgllrdpx477puthmplvva8']}
+    assert bip85.entropy_to_bip93(entropy, threshold=2, n=3, id=[24,15,15,31]) == fresh_seed_one
+
+    entropy = bip85.bip32_xprv_to_entropy("m/83696968'/93'/0'/3'/9'/16'/32'/32'/32'/32'/0'", XPRV)
+    fresh_seed_two = {'identifier': 'ms8t', 'codex32': ['ms13ms8tu5dtz5c6d7lfg7l48mmewvhdu0z6q6eav29umjhl', 'ms13ms8tneyjzext4y7cd0s6c2gwn92smyldywhfrzc2xmhq', 'ms13ms8tz6nt2nvekkjyqn2lqdszm8pfydmmttfytvg28fcv', 'ms13ms8tdh6j27jgwvn49z9slur4xwu5rxxv0l8syy4u6qcn', 'ms13ms8tp85zuyk2ct2msvjjtvwxljg52fza02ln8plkfegf', 'ms13ms8tcfk9nlh8e6uhaqrxrk9pa8djsquk4xhs4zv87jnv', 'ms13ms8tenrpvzdmjtxkuputf72p4xy422s8n2dryeva3yk2', 'ms13ms8tjr3kayuh74yevw0hjz8wmyrhpwnuzzd6jecsfdjx', 'ms13ms8tf2pum4a46gstsuerm3ad49xt0fcq6rfaavu8lquq']}
+    assert bip85.entropy_to_bip93(entropy, threshold=3, n=9, id=[32,32,32,32]) == fresh_seed_two
+
+    entropy = bip85.bip32_xprv_to_entropy("m/83696968'/93'/0'/3'/2'/16'/8'/15'/32'/32'/0'", XPRV)
+    existing_seed_one = {'identifier': 'g0fy', 'codex32': ['ms13g0fyarrwyawuktl8qptwqy3np7jx3xfv992ytz5kcq8h', 'ms13g0fyc4e379zymy6tzdhgzwfeq6ymwlr36qext53v2vp4']}
+    assert bip85.entropy_to_bip93(entropy, threshold=3, n=2, id=[8,15,32,32]) == existing_seed_one
+
+    entropy = bip85.bip32_xprv_to_entropy("m/83696968'/93'/0'/2'/1'/64'/32'/29'/19'/19'/0'", XPRV)
+    existing_seed_two = {'identifier': 'mann', 'codex32': ['ms12mannaczq4kkph3gtppqu5ehjes6fvsyh09m0tk3ag5z3tkq5p5menyjpukyy2dvddk4yu979949g08jlfdt4w946we8dynamcu22c0tr6s2rndpnrmqac6z23nd']}
+    assert bip85.entropy_to_bip93(entropy, threshold=2, n=1, byte_length=64, id=[32,29,19,19]) == existing_seed_two
+
 def test_xprv():
     bip85 = BIP85()
     result = bip85.bip32_xprv_to_xprv("83696968'/32'/0'", XPRV)
@@ -103,6 +129,9 @@ def test_hex(path, width, expect):
 def test_bipentropy_applications():
     assert app.bip39(XPRV, 'english', 18, 0) == \
            'near account window bike charge season chef number sketch tomorrow excuse sniff circle vital hockey outdoor supply token'
+    
+    assert app.bip93(XPRV, hrp='ms', threshold=0, n=1, byte_length=16, identifier='c0??', index=1) == \
+           {'identifier': 'c0zc', 'codex32': ['ms10c0zcs35ddcltwzsrjnz8vh97s8ml0dara49ch74gxm5x']}
 
     assert app.xprv(XPRV, 0) == \
            'xprv9s21ZrQH143K2srSbCSg4m4kLvPMzcWydgmKEnMmoZUurYuBuYG46c6P71UGXMzmriLzCCBvKQWBUv3vPB3m1SATMhp3uEjXHJ42jFg7myX'
@@ -110,6 +139,12 @@ def test_bipentropy_applications():
     assert app.wif(XPRV, 0) == 'Kzyv4uF39d4Jrw2W7UryTHwZr1zQVNk4dAFyqE6BuMrMh1Za7uhp'
 
     assert app.hex(XPRV, 0, 32) == 'ea3ceb0b02ee8e587779c63f4b7b3a21e950a213f1ec53cab608d13e8796e6dc'
+
+    assert app.base64(XPRV, pwd_len=21, index=0) == b'dKLoepugzdVJvdL56ogNV'
+
+    assert app.base85(XPRV, pwd_len=12, index=0) == b'_s`{TW89)i4`'
+
+    assert app.dice(XPRV, sides=6, rolls=10, index=0) == '1,0,0,2,0,1,5,5,2,4'
 
 if __name__ == "__main__":
     pytest.main()
