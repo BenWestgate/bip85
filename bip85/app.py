@@ -66,7 +66,6 @@ def bip93(xprv_string, hrp, threshold, n, byte_length, identifier, index):
         raise ValueError("ERROR: Index must be between 0 and 146.")
     bip85 = BIP85()
     path = f"83696968p/93p/{hrp_code}p/{threshold}p/{n}p/{byte_length}p/{id[0]}p/{id[1]}p/{id[2]}p/{id[3]}p/{index}p"
-    print(path)
     entropy = bip85.bip32_xprv_to_entropy(path, xprv_string)
     return bip85.entropy_to_bip93(entropy, hrp, threshold, n, byte_length, id)
 
