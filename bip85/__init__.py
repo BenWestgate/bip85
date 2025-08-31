@@ -114,8 +114,8 @@ class BIP85(object):
         if 32 in id:
             bip32_fp = fingerprint(bytes(convertbits(codex32_secret[6:], 5, 8)))
             for data in initial_codex32_data:
-                for i in range(1,5): # relabel shares with the BIP32 fingerprint
-                    data[i] = data[i] if id[i - 1] < 32 else bip32_fp[i - 1]
+                for i in range(4): # relabel shares with the BIP32 fingerprint
+                    data[i + 1] = data[i + 1] if id[i] < 32 else bip32_fp[i]
         if threshold and n >= threshold:
             strings = []
             existing_share_indexes = [16]
